@@ -1,0 +1,11 @@
+# Re-applies the policy AFTER wake from sleep. "After=" the sleep targets means this runs when the system resumes
+# (Before= would run it as the system goes to sleep). Firmware/kernel can reset power settings on wake.
+[Unit]
+Description=mbp14 power and fan policy after resume
+After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/sleep 3
+ExecStart=/usr/local/libexec/mbp14/mbp14-power-policy auto
+[Install]
+WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target

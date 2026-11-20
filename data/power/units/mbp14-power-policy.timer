@@ -1,0 +1,9 @@
+# Re-checks and re-applies every 5 minutes so drift heals by itself, with no human action.
+[Unit]
+Description=mbp14 power and fan policy self-heal (every 5 minutes)
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+AccuracySec=30s
+[Install]
+WantedBy=timers.target

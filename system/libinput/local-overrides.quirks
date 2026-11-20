@@ -1,0 +1,29 @@
+# libinput local override for the Apple SPI keyboard and touchpad of the 2017 13-inch laptop whose DMI product_name ends in
+# "BookPro14,1" (Intel Core i5-7360U). Install as /etc/libinput/local-overrides.quirks. Undo: delete the file.
+#
+# WHY THIS FILE EXISTS (verified on one machine, a Red Hat-family distribution, libinput as shipped there):
+#  * libinput already ships a GENERIC quirk for this class of device ("Apple Laptop Touchpad (SPI) applespi driver" in
+#    /usr/share/libinput/50-system-apple.quirks: SizeHint 104x75, TouchSizeRange 150:130, PalmSizeThreshold 1600).
+#    The section below matches the touchpad BY NAME and gives this model its own size and thresholds.
+#  * The numbers below are EMPIRICAL values chosen by trial on one unit. They are NOT upstream recommendations. If palm
+#    touches register as clicks or real touches are ignored on your unit, adjust them (see docs/HOW-IT-WORKS.md, "Touchpad").
+#  * Quirks are libinput internal API and can change between versions; a syntax error disables ALL quirks, so after editing run
+#    `libinput quirks list /dev/input/eventN` (package libinput-utils) and check that the device still matches.
+
+# Mark the built-in SPI keyboard as internal so libinput's "disable touchpad while typing" can pair it with the touchpad.
+[Apple SPI Keyboard (14,1)]
+MatchName=Apple SPI Keyboard
+MatchUdevType=keyboard
+MatchBus=spi
+AttrKeyboardIntegration=internal
+
+# Model-specific size and palm/thumb thresholds for the touchpad.
+[Apple SPI Touchpad (14,1)]
+MatchName=Apple SPI Touchpad
+MatchUdevType=touchpad
+MatchBus=spi
+ModelAppleTouchpad=1
+AttrSizeHint=135x83
+AttrTouchSizeRange=50:30
+AttrPalmSizeThreshold=1000
+AttrThumbSizeThreshold=800

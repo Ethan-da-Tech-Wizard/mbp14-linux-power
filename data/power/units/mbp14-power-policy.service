@@ -1,0 +1,10 @@
+# Applies data/power/policy.json (installed copy /etc/mbp14/power-policy.json): EPP, turbo, max freq, RAPL, fan floor.
+# Triggers: boot (WantedBy), the 5-minute timer, and the udev rule on AC plug/unplug. Read-back is printed to the journal.
+[Unit]
+Description=mbp14 power and fan policy (battery 10-hour design, AC performance with fan)
+After=multi-user.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/mbp14/mbp14-power-policy auto
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+# Runtime power management defaults for battery life. Install as /etc/udev/rules.d/90-mbp14-runtime-pm.rules. Undo: delete the file.
+# Pair this with 99-mbp14-touchpad-awake.rules, which exempts the touchpad/Bluetooth controllers (it must sort AFTER this file).
+#
+# Let every PCI device auto-suspend when idle (Wi-Fi, camera, Thunderbolt, NVMe, chipset functions).
+ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+# SATA link power management where a SATA host exists.
+ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="med_power_with_dipm"
+# Audio codec power saving: device runtime PM plus the snd_hda_intel module parameters (also set in 90-mbp14-power.conf).
+ACTION=="add", SUBSYSTEM=="sound", KERNEL=="card*", ATTR{device/power/control}="auto"
+ACTION=="add", SUBSYSTEM=="module", KERNEL=="snd_hda_intel", ATTR{parameters/power_save}="1", ATTR{parameters/power_save_controller}="Y"

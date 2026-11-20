@@ -1,0 +1,2 @@
+# Apply the policy the moment mains power is plugged in or removed.
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ACTION=="change", RUN+="/usr/bin/systemctl --no-block start mbp14-power-policy.service"

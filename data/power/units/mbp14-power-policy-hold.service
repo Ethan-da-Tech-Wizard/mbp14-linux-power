@@ -1,0 +1,15 @@
+# Holds the CPU package power limits (PL1/PL2) against the laptop firmware, which we observed re-writing them every few seconds on one unit
+# (measured 2026-11-19: PL1 flipped 100 W / 95 W continuously after the one-shot applier set 15 W; thermald was idle).
+# Re-asserts ONLY the two RAPL limits, only when they differ, every 0.2 s on AC and every 1 s on battery (measured 2026-11-20: under load on AC the firmware rewrites PL1 about once a second). No fan, EPP or frequency writes; no thermal
+# protection is touched. Undo: systemctl disable --now mbp14-power-policy-hold.service
+[Unit]
+Description=mbp14 power policy hold (re-assert PL1/PL2 against firmware rewrites)
+After=mbp14-power-policy.service
+[Service]
+Type=simple
+ExecStart=/usr/local/libexec/mbp14/mbp14-power-policy hold --interval 0.2 --battery-interval 1
+Restart=always
+RestartSec=10
+Nice=10
+[Install]
+WantedBy=multi-user.target

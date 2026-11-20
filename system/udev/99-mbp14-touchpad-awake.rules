@@ -1,0 +1,20 @@
+# Keep the controllers that feed the touchpad and the Bluetooth UART out of PCI runtime power management.
+# Install as /etc/udev/rules.d/99-mbp14-touchpad-awake.rules (the 99- prefix matters, see below). Undo: delete the file.
+#
+# WHY 99-: the sibling rule 90-mbp14-runtime-pm.rules sets power/control="auto" for EVERY PCI device. udev applies rules in file name
+# order, so this file (99-) runs later and flips just these devices back to "on" (never auto-suspend). If you rename it so it
+# sorts BEFORE 90-, the touchpad controllers will auto-suspend again.
+#
+# The four PCI functions below are Intel Sunrise Point-LP "Serial IO" controllers (driver intel-lpss), checked with lspci on one unit:
+#   0000:00:1e.0  UART #0        (the Bluetooth chip is attached here)
+#   0000:00:1e.3  SPI  #1        (the keyboard and the touchpad are attached here: `dmesg` shows "Apple SPI Touchpad" under pxa2xx-spi.3)
+#   0000:00:15.0  I2C  #0  and  0000:00:15.2  I2C #2   (what is attached to these two was NOT verified; kept awake on the same precaution)
+# VERIFY ON YOUR UNIT before trusting the addresses:
+#   lspci -nn -s 00:1e.3          readlink /sys/bus/pci/devices/0000:00:1e.3/driver
+#   journalctl -k -b | grep -i -E "pxa2xx-spi|Apple SPI"
+ACTION=="add|change", SUBSYSTEM=="pci", KERNEL=="0000:00:1e.0", ATTR{power/control}="on"
+ACTION=="add|change", SUBSYSTEM=="pci", KERNEL=="0000:00:1e.3", ATTR{power/control}="on"
+ACTION=="add|change", SUBSYSTEM=="pci", KERNEL=="0000:00:15.0", ATTR{power/control}="on"
+ACTION=="add|change", SUBSYSTEM=="pci", KERNEL=="0000:00:15.2", ATTR{power/control}="on"
+# The touchpad input device itself, where the kernel exposes a power/control file for it.
+ACTION=="add|change", SUBSYSTEM=="input", ATTRS{name}=="Apple SPI Touchpad", TEST=="power/control", ATTR{power/control}="on"

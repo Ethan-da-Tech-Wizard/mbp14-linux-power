@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "note": "ONE source of truth for BookPro14,1 power and fan targets. The root applier (scripts/mbp14_power_apply.py) and the stability checker (scripts/power_stability.py) both read this file, so they can never disagree. Edit values here, then re-run scripts/install_power_root_unit.sh, which copies it to /etc/mbp14/power-policy.json. The values are the original owner's choices, not upstream defaults: battery = a 10-hour design (turbo off, capped frequency, low power limits) while the fan may still run; plugged in = performance with active cooling. Change them to suit yourself: see docs/CONFIGURATION.md.",
+  "modes": {
+    "bat": {
+      "label": "On battery: the 10-hour design",
+      "epp": {"value": "power", "why": "Energy-saving CPU hint; {{OWNER}} chose the 10-hour design (2026-11-19)."},
+      "no_turbo": {"value": 1, "why": "Turbo is the biggest battery drain; off on battery."},
+      "max_freq_khz": {"value": 2300000, "why": "2.3 GHz cap keeps the CPU efficient on battery."},
+      "pl1_uw": {"value": 9000000, "why": "9 W sustained package limit for the 10-hour target."},
+      "pl2_uw": {"value": 13000000, "why": "13 W short burst limit so the laptop still feels responsive."},
+      "fan_min_rpm": {"value": 1200, "why": "Firmware minimum (1200). The fan is NOT forbidden on battery: thermald and the firmware may spin it up as needed; the policy simply does not force a higher floor, which saves power."},
+      "fan_policy": {"value": "auto", "why": "Let thermald and firmware pick the speed above the floor."}
+    },
+    "ac": {
+      "label": "Plugged in: performance with active cooling",
+      "epp": {"value": "balance_performance", "why": "Fast but still efficient while on mains."},
+      "no_turbo": {"value": 0, "why": "Turbo allowed on mains."},
+      "max_freq_khz": {"value": 3600000, "why": "Full 3.6 GHz on mains."},
+      "pl1_uw": {"value": 15000000, "why": "15 W sustained: the chip's rated TDP (Intel ARK)."},
+      "pl2_uw": {"value": 25000000, "why": "25 W burst: the chip's rated maximum short-term power."},
+      "fan_min_rpm": {"value": 2400, "why": "A raised floor (firmware minimum is 1200) so the fan is already moving before heat builds: intended to give sustained performance with less throttling (we measured 91 to 100 C package temperature under heavy load: see docs/CAVEATS.md). {{OWNER}}: plugged in, it needs to use its fan."},
+      "fan_policy": {"value": "auto", "why": "Above the floor, thermald and firmware may raise the speed further."}
+    }
+  },
+  "limits": {
+    "note": "The root applier clamps every value to these ranges, so a tampered policy file cannot push the hardware outside these guard rails (they are guard rails, not a safety guarantee).",
+    "epp_allowed": ["power", "balance_power", "balance_performance", "performance", "default"],
+    "max_freq_khz": [800000, 3600000],
+    "pl_uw": [5000000, 28000000],
+    "fan_min_rpm": [1200, 3500]
+  }
+}
